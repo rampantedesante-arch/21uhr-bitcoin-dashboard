@@ -1,0 +1,12 @@
+21UHR BITCOIN DASHBOARD – GITHUB PAGES
+
+1. Bei github.com anmelden.
+2. Ein neues PUBLIC Repository namens 21uhr-bitcoin-dashboard erstellen.
+3. Alle Dateien aus diesem ZIP direkt ins Hauptverzeichnis hochladen:
+   index.html, manifest.webmanifest, icon-192.png, icon-512.png, .nojekyll
+4. Im Repository: Settings > Pages. Unter Build and deployment: Deploy from a branch. Branch main, Ordner /(root), Save.
+5. GitHub zeigt anschließend die HTTPS-Adresse an. Normalerweise:
+   https://BENUTZERNAME.github.io/21uhr-bitcoin-dashboard/
+6. Diese Adresse in Vanadium auf dem Pixel mit GrapheneOS öffnen und im Browsermenü "Zum Startbildschirm hinzufügen" bzw. "App installieren" wählen.
+
+WICHTIG: Damit wird das Dashboard öffentlich einsehbar. Die Daten werden im Browser direkt von externen APIs geladen. Die Funktion hängt von deren Erreichbarkeit ab.

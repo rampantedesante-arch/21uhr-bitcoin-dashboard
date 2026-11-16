@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>21Uhr Bitcoin Dashboard – Live</title>
+<style>
+:root{color-scheme:dark;--bg:#070b11;--panel:#152235;--border:#52617a;--orange:#ff8a12;--muted:#b9c4d3;--text:#fff;--ok:#89dba5}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;color:var(--text);background:#070b11}
+body{padding:12px;background:radial-gradient(ellipse at 50% 0%,#182a3c,#070b11 70%)}
+.dashboard{max-width:1600px;margin:auto;min-height:min(870px,calc(100dvh - 24px));padding:18px 21px 14px;border:1px solid #35465c;border-radius:20px;background:linear-gradient(140deg,#111e2d,#0b121d);display:flex;flex-direction:column;gap:12px}
+.header{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:62px}
+.brand{display:flex;align-items:center;gap:14px;min-width:0}.logo{background:linear-gradient(#ff9e24,#fa800a);border-radius:50%;width:55px;height:55px;display:grid;place-items:center;flex-shrink:0;font-size:35px;font-weight:900;box-shadow:0 3px 18px #ff8a1224}
+h1{font-size:clamp(24px,2.7vw,40px);line-height:1;letter-spacing:-1px;margin:0;font-weight:900}.strap{font-size:clamp(13px,1vw,16px);margin:5px 0 0;color:var(--muted)}
+.header-actions{display:flex;align-items:center;gap:14px}.refresh{background:#ff8a12;color:#111827;border:0;border-radius:10px;padding:11px 17px;font-size:15px;font-weight:800;cursor:pointer;white-space:nowrap}.refresh:disabled{opacity:.55;cursor:progress}.refresh:hover:not(:disabled){background:#ffad53}.updated{font-size:13px;color:var(--muted);text-align:right;white-space:nowrap}.updated strong{color:white;font-size:14px;display:block;margin-top:4px}
+.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;flex:0 0 auto}
+.card{background:linear-gradient(135deg,#19283a,#101a29);border:1px solid var(--border);border-radius:13px;padding:13px 17px;min-width:0;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden}
+.metric{min-height:136px}.heading{display:flex;align-items:center;gap:9px;margin-bottom:9px;font-size:clamp(17px,1.6vw,24px);font-weight:800;letter-spacing:-.35px}.ico{color:var(--orange);width:25px;font-size:24px;line-height:1;flex-shrink:0;text-align:center}.number{font-size:clamp(34px,3.3vw,56px);font-weight:900;letter-spacing:-1.7px;line-height:1.05;font-variant-numeric:tabular-nums;white-space:nowrap}.number .unit{font-size:.55em;letter-spacing:0}.hint{font-size:clamp(12px,.94vw,15px);color:var(--muted);margin-top:8px;line-height:1.25;min-height:16px}.muted{color:var(--muted)}
+.millionaire{min-height:142px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px 18px;border-color:#a66d32;background:linear-gradient(110deg,#1a2737,#18212b)}
+.millionaire .heading{font-size:clamp(20px,2.1vw,29px);margin:0 0 6px}.millionaire .hint{font-size:clamp(13px,1.1vw,17px);margin-top:2px}.emphasis{border-radius:12px;background:linear-gradient(#ffa028,#f7850d);padding:15px 28px;min-width:280px;text-align:center}.emphasis .number{font-size:clamp(37px,3.4vw,56px)}.emphasis .hint{color:#fff;font-weight:700;margin-top:6px}
+.bottom{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;flex:1;min-height:0}.share{min-height:156px}.share .heading{font-size:clamp(20px,1.9vw,27px)}.share .number{font-size:clamp(36px,3.6vw,58px);color:#ffa12c}.share .hint{font-size:clamp(13px,1.05vw,17px)}
+/* Zurückhaltende Live-Zusatzdaten unterhalb des Hauptdashboards */
+.extras{border-top:1px solid #35465c;padding-top:9px;flex:0 0 auto}
+.extra-heading{display:flex;align-items:baseline;justify-content:space-between;gap:12px;color:#9bacbd;font-size:12px;letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px}
+.extra-heading span:last-child{text-transform:none;letter-spacing:0;font-size:12px}
+.extra-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}
+.extra-item{min-width:0;border:1px solid #304053;border-radius:9px;padding:8px 10px;background:#101925}
+.extra-item .k{font-size:11px;color:#9facbd;line-height:1.2;min-height:14px}
+.extra-item .v{font-size:clamp(15px,1.45vw,22px);font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;margin-top:4px}
+.extra-item .detail{font-size:11px;color:#879bad;line-height:1.2;margin-top:3px;min-height:12px}
+.extra-item .v.up{color:#91d3a2}.extra-item .v.down{color:#ff9990}
+@media(min-width:1200px) and (min-height:740px){.dashboard{gap:9px;padding-top:12px;padding-bottom:10px}.metric{min-height:0}.millionaire{min-height:100px;flex:.42}.bottom{flex:.7}.extras{max-height:170px}}
+@media(max-width:950px){.extra-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.extra-item .v{font-size:18px}}
+@media(max-width:550px){.extra-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.extra-heading{flex-direction:column;gap:2px}}
+.footer{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:12px;color:var(--muted);min-height:24px}.ok{color:var(--ok)}.warn{color:#ffc57c}.error{color:#ffaca0}
+@media(min-width:1200px) and (min-height:740px){.dashboard{height:calc(100dvh - 24px);max-height:1000px}.metric{flex:1;min-height:0}.metrics{flex:1}.millionaire{flex:.55}.bottom{flex:.8}}
+@media(max-width:760px){body{padding:8px}.dashboard{padding:12px;gap:10px}.updated{font-size:11px}.updated strong{font-size:12px}.logo{width:42px;height:42px;font-size:27px}.metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.metric{min-height:120px}.number{font-size:clamp(27px,5vw,41px)}.heading{font-size:17px}.millionaire{grid-template-columns:1fr}.emphasis{min-width:0}.bottom{grid-template-columns:1fr}.share{min-height:130px}.footer{flex-wrap:wrap}}
+@media(max-width:480px){.metrics{grid-template-columns:1fr}.header{align-items:flex-start}.header-actions{flex-direction:column;align-items:end;gap:5px}.refresh{padding:9px;font-size:12px}.updated{max-width:115px;white-space:normal}.millionaire .heading{font-size:20px}.emphasis .number,.share .number{font-size:37px}}
+@media(min-width:1200px) and (min-height:740px){
+.dashboard{gap:8px}
+.metrics{flex:0 0 284px;grid-template-rows:repeat(2,minmax(0,1fr))}
+.millionaire{flex:0 0 auto;min-height:132px}
+.bottom{flex:0 0 137px;min-height:0}
+.share{min-height:0;padding:10px 16px}
+.share .heading{margin-bottom:4px}
+.share .hint{margin-top:4px}
+.extras{flex:0 0 auto;max-height:none;padding-top:7px}
+.extra-heading{margin-bottom:5px}
+.extra-item{padding:5px 9px}
+.extra-item .v{font-size:18px;margin-top:2px}
+.extra-item .detail{margin-top:2px}
+.footer{min-height:18px}
+}
+/* Mobile: lesbare Abstände, auch im schmalen Browser */
+@media(max-width:480px){
+ body{padding:0;background:#0b121d}
+ .dashboard{border-radius:0;border-left:0;border-right:0;padding:12px 11px 24px;gap:12px}
+ .header{display:flex;flex-direction:column;align-items:stretch;gap:12px}
+ .header-actions{width:100%;flex-direction:row;justify-content:space-between;align-items:center}
+ .updated{text-align:right;max-width:175px}
+ h1{font-size:clamp(23px,6.8vw,32px);line-height:1.05}
+ .metrics{grid-template-columns:1fr;gap:10px}
+ .metric,.share{padding:13px 15px}
+ .metric{min-height:105px!important}
+ .number{font-size:clamp(31px,9vw,48px);white-space:normal;overflow-wrap:anywhere}
+ .heading{font-size:19px;line-height:1.2}
+ .share .number{font-size:clamp(34px,10vw,48px)}
+ .millionaire{grid-template-columns:1fr;gap:12px}
+ .emphasis{width:100%;padding:13px 16px!important}
+ .emphasis .number{font-size:clamp(35px,11vw,52px)!important}
+ .bottom{grid-template-columns:1fr}
+ .extra-heading span:last-child{display:none}
+ .extra-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .footer{font-size:12px;align-items:flex-start}
+ .refresh{min-height:42px;padding:10px 13px}
+}
+/* Der Preisblock darf auch bei kleiner Browserhöhe nicht abgeschnitten werden. */
+.millionaire{overflow:visible}
+.millionaire .emphasis{padding:11px 24px}
+.millionaire .emphasis .number{line-height:1.08}
+@media(max-width:920px){.millionaire{min-height:142px}}
+
+/* Finale Layoutkorrektur: Inhalte niemals unter festen Kachelhöhen abschneiden. */
+.dashboard{height:auto!important;max-height:none!important;min-height:calc(100dvh - 24px)}
+.metrics{flex:0 0 auto!important;grid-auto-rows:minmax(120px,auto)}
+.card{overflow:visible}
+.metric{min-height:120px!important}
+.millionaire{flex:0 0 auto!important;min-height:108px!important}
+.bottom{flex:0 0 auto!important;min-height:145px!important;grid-auto-rows:minmax(145px,auto)}
+.share{min-height:145px!important;justify-content:flex-start}
+.share .number{margin:4px 0}
+.share .hint{margin-top:4px;min-height:0}
+.extra-grid{align-items:stretch}
+.extra-item{min-height:74px;display:flex;flex-direction:column;justify-content:flex-start;overflow:visible}
+.extra-item .detail{min-height:0;overflow-wrap:anywhere}
+.extra-item.halving{min-height:84px}
+.extra-item.halving .detail{font-size:10.5px;line-height:1.23}
+@media(max-width:760px){.dashboard{min-height:0}.bottom{grid-auto-rows:auto}.share{min-height:140px!important}}
+</style></head><body>
+<main class="dashboard">
+ <header class="header"><div class="brand"><div class="logo">₿</div><div><h1>21UHR BITCOIN DASHBOARD</h1></div></div><div class="header-actions"><button class="refresh" type="button" id="refreshBtn" title="Alle Live-Daten neu abrufen">↻ Jetzt aktualisieren</button><div class="updated">Letzte Datenaktualisierung:<strong id="lastUpdated">Lädt …</strong></div></div></header>
+ <section class="metrics" aria-label="Aktuelle Bitcoin-Kennzahlen">
+  <article class="card metric"><div class="heading"><span class="ico">₿</span>Bitcoin-Kurs</div><div class="number" id="btcPrice">–</div><div class="hint" id="priceMeta">Kurs in EUR: –</div></article>
+  <article class="card metric"><div class="heading"><span class="ico">◎</span>Satoshis pro US-Dollar</div><div class="number" id="satsPerUsd">–</div><div class="hint">So viele Satoshis bekommst du für 1 US-Dollar</div></article>
+  <article class="card metric"><div class="heading"><span class="ico">◉</span>Marktkapitalisierung</div><div class="number" id="marketCap">–</div><div class="hint" id="marketMeta">Marktwert in US-Dollar</div></article>
+  <article class="card metric"><div class="heading"><span class="ico">▣</span>Blockhöhe</div><div class="number" id="blockHeight">–</div><div class="hint" id="blockMeta">Aktuell bestätigter Bitcoin-Block</div></article>
+  <article class="card metric"><div class="heading"><span class="ico">⚡</span>Gebühren</div><div class="number"><span id="feesFast">–</span> <span class="unit">sat/vB</span></div><div class="hint" id="feesMeta">Empfohlene schnelle Gebühr</div><div class="hint" id="feesUsd">Beispieltransaktion (140 vB): – USD</div></article>
+  <article class="card metric"><div class="heading"><span class="ico">∑</span>Hashrate</div><div class="number"><span id="hashRate">–</span> <span class="unit">EH/s</span></div><div class="hint" id="hashMeta">Geschätzte Netzwerk-Rechenleistung (3 Tage)</div></article>
+ </section>
+ <section class="bottom" aria-label="Bitcoin gleich verteilt"><article class="card share"><div class="heading"><span class="ico">◎</span>Gleicher Anteil pro Mensch</div><div class="number" id="equalShareSats">–</div><div class="hint" id="populationMeta">Berechnung mit 8,3 Milliarden Menschen</div><div class="hint">Wenn 21 Millionen BTC auf alle Menschen verteilt würden</div></article><article class="card share"><div class="heading"><span class="ico">€</span>Was kostet dieser Anteil heute?</div><div class="number" id="equalShareCost">–</div><div class="hint">Kaufpreis für den gleichen Anteil pro Mensch</div><div class="hint" id="costMeta">Anzeige in USD und EUR</div></article></section>
+ <section class="card millionaire" aria-label="Satoshi-Millionär"><div><div class="heading"><span class="ico">₿</span>Was kostet es heute Satoshi-Millionär zu sein?</div><div class="hint">1.000.000 Sats = 0,01 Bitcoin</div></div><div class="emphasis"><div class="number" id="millionSatsCost">–</div><div class="hint" id="millionSatsEuro">Auch in Euro: –</div></div></section>
+ <section class="extras" aria-label="Weitere Live-Netzwerkdaten">
+   <div class="extra-heading"><span>Weitere Netzwerkdaten · laufend aktualisiert</span><span>Sekundäre Netzwerkdaten und Schätzungen</span></div>
+   <div class="extra-grid">
+    <div class="extra-item"><div class="k">Ø Blockzeit · Difficulty-Periode</div><div class="v" id="avgBlockTime">–</div><div class="detail">Sollwert: 10 Minuten</div></div>
+    <div class="extra-item"><div class="k">Blöcke · letzte 24 Stunden</div><div class="v" id="blocks24h">–</div><div class="detail">Richtwert: 144 · zeitnaher Näherungswert</div></div>
+    <div class="extra-item"><div class="k">Letzte Difficulty-Anpassung</div><div class="v" id="diffPrevious">–</div><div class="detail" id="diffPreviousMeta">–</div></div>
+    <div class="extra-item"><div class="k">Nächste Difficulty-Anpassung</div><div class="v" id="diffNext">–</div><div class="detail" id="diffNextMeta">Prognose</div></div>
+    <div class="extra-item"><div class="k">Difficulty · aktuell</div><div class="v" id="difficultyNow">–</div><div class="detail">In Billionen</div></div>
+    <div class="extra-item"><div class="k">Blocksubvention</div><div class="v" id="subsidy">–</div><div class="detail">BTC je Block · ohne Gebühren</div></div>
+    <div class="extra-item halving"><div class="k">Halving-Epoche</div><div class="v" id="epoch">–</div><div class="detail" id="epochMeta">–</div><div class="detail" id="halvingEstimate">Nächstes Halving: –</div></div>
+    <div class="extra-item"><div class="k">Erzeugte Bitcoin</div><div class="v" id="supply">–</div><div class="detail" id="supplyPct">Von maximal 21 Mio. BTC</div></div>
+    <div class="extra-item"><div class="k">Lokale Uhrzeit</div><div class="v" id="localClock">–</div><div class="detail" id="localDate">–</div></div>
+    <div class="extra-item"><div class="k">Bis zur nächsten Anpassung</div><div class="v" id="remainingBlocks">–</div><div class="detail">Blöcke · ca. alle 2 Wochen</div></div>
+   </div>
+ </section>
+ <footer class="footer"><span>Weltbevölkerung: Rechenannahme 8,3 Mrd. · Preise ohne Kaufgebühren · Hashrate geschätzt</span><span id="statusBox">Status: <span class="warn">Lade Live-Daten …</span></span></footer>
+</main>
+<script>
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const POP = 8_300_000_000, BTC_MAX=21_000_000, SATS=100_000_000, INTERVAL=60_000;
+const fmtInt = n => Math.round(n).toLocaleString('de-DE');
+const fmt1 = n => n.toLocaleString('de-DE',{maximumFractionDigits:1});
+const fmtMoney = (n,c) => n.toLocaleString('de-DE',{style:'currency',currency:c,minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtCap = n => fmt1(n/1e12)+' Bio. $';
+const fmtDate = n => new Date(n).toLocaleString('de-DE');
+const cacheKey = '21uhr-bitcoin-dashboard-live-v4';
+let state={block:null,fees:null,price:null,hash:null,hashDifficulty:null,difficulty:null,blocks24:null};
+let timestamps={}; let refreshing=false; let fetchErrors=[];
+try { const saved=JSON.parse(localStorage.getItem(cacheKey)||'null');if(saved&&saved.state&&saved.timestamps){state={...state,...saved.state};timestamps=saved.timestamps;} }catch(_){ }
+function store(){try{localStorage.setItem(cacheKey,JSON.stringify({state,timestamps}));}catch(_){}}
+function supplyFromHeight(h){
+ let remain=Math.floor(h)+1,total=0,reward=50;
+ while(remain>0&&reward>0){const count=Math.min(210000,remain);total+=count*reward;remain-=count;reward/=2;}
+ return total;
+}
+function fmtSignedPct(n){return (n>0?'+':'')+n.toLocaleString('de-DE',{maximumFractionDigits:2})+' %';}
+function timeText(seconds){const total=Math.max(0,Math.round(seconds));return Math.floor(total/60)+' Min. '+String(total%60).padStart(2,'0')+' Sek.';}
+function safeSet(id,value){if(value!==undefined&&value!==null)$(id).textContent=value;}
+function renderExtras(){
+ const h=state.block;
+ if(Number.isInteger(h)&&h>0){
+  const e=Math.floor(h/210000),n=e+1,sub=50/Math.pow(2,e),sup=supplyFromHeight(h);
+  const halvingHeight=(e+1)*210000;
+  const halvingBlocksLeft=Math.max(0,halvingHeight-h);
+  // Langfristige Prognose mit dem Bitcoin-Zielintervall von 10 Minuten je Block.
+  // Die tatsächliche Hashrate lässt das Datum schwanken.
+  const estimatedHalving=new Date(Date.now()+halvingBlocksLeft*10*60*1000);
+  safeSet('epoch',String(n));
+  safeSet('epochMeta',`${fmtInt(halvingBlocksLeft)} Blöcke bis Halving ${n}`);
+  safeSet('halvingEstimate',`Ca. ${estimatedHalving.toLocaleDateString('de-DE',{month:'short',year:'numeric'})} · bei 10 Min./Block`);
+  safeSet('subsidy',sub.toLocaleString('de-DE',{maximumFractionDigits:8})+' BTC');
+  safeSet('supply',fmt1(sup/1e6)+' Mio. BTC');safeSet('supplyPct',fmt1(sup/BTC_MAX*100)+' % von 21 Mio.');
+ }
+ const d=state.difficulty;
+ if(d){
+  if(Number.isFinite(d.avgMs))safeSet('avgBlockTime',timeText(d.avgMs/1000));
+  if(Number.isFinite(d.prev)){
+    safeSet('diffPrevious',fmtSignedPct(d.prev));$('diffPrevious').className='v '+(d.prev>=0?'up':'down');
+  }
+  if(Number.isFinite(d.previousTime))safeSet('diffPreviousMeta','Zuletzt: '+new Date(d.previousTime<1e12?d.previousTime*1000:d.previousTime).toLocaleDateString('de-DE'));
+  if(Number.isFinite(d.next)){
+    safeSet('diffNext',fmtSignedPct(d.next));$('diffNext').className='v '+(d.next>=0?'up':'down');
+  }
+  if(Number.isFinite(d.nextDate))safeSet('diffNextMeta','Voraussichtlich: '+new Date(d.nextDate<1e12?d.nextDate*1000:d.nextDate).toLocaleDateString('de-DE'));
+  if(Number.isFinite(d.remaining))safeSet('remainingBlocks',fmtInt(d.remaining));
+ }
+ if(Number.isFinite(state.blocks24))safeSet('blocks24h',fmtInt(state.blocks24)+' / 144');
+ if(state.hashDifficulty&&Number.isFinite(state.hashDifficulty))safeSet('difficultyNow',fmt1(state.hashDifficulty/1e12)+' Bio.');
+}
+function updateClock(){const now=new Date();safeSet('localClock',now.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit',second:'2-digit'}));safeSet('localDate',now.toLocaleDateString('de-DE',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}));}
+function render(){
+ if(state.price){
+   const {usd,eur,cap}=state.price;
+   $('btcPrice').textContent=fmtMoney(usd,'USD');
+   $('priceMeta').textContent=eur?`Kurs in EUR: ${fmtMoney(eur,'EUR')}`:'Euro-Kurs nicht verfügbar';
+   $('satsPerUsd').textContent=fmtInt(SATS/usd);
+   $('millionSatsCost').textContent=fmtMoney(usd/100,'USD');
+   $('millionSatsEuro').textContent=eur?`Auch in Euro: ${fmtMoney(eur/100,'EUR')}`:'Euro-Kurs nicht verfügbar';
+   $('equalShareCost').textContent=fmtMoney(usd*BTC_MAX/POP,'USD');
+   $('costMeta').textContent=eur?`In Euro: ${fmtMoney(eur*BTC_MAX/POP,'EUR')}`:'Euro-Kurs nicht verfügbar';
+   if(cap){$('marketCap').textContent=fmtCap(cap);$('marketMeta').textContent='Marktwert in US-Dollar';}
+ }
+ $('equalShareSats').textContent=fmtInt(BTC_MAX*SATS/POP)+' sats';
+ if(state.block!==null)$('blockHeight').textContent=fmtInt(state.block);
+ if(state.fees){$('feesFast').textContent=fmtInt(state.fees.fast);$('feesMeta').textContent=`Normal: ${fmtInt(state.fees.normal)} · Langsam: ${fmtInt(state.fees.slow)} sat/vB`;}
+ if(state.fees && state.price?.usd){const txUsd=(state.fees.fast*140*state.price.usd)/SATS; $('feesUsd').textContent=`Beispieltransaktion (140 vB): ${fmtMoney(txUsd,'USD')}`;}
+ if(state.hash!==null)$('hashRate').textContent=fmt1(state.hash);
+ renderExtras();updateClock();
+ const mostRecent=Math.max(0,...Object.values(timestamps));
+ $('lastUpdated').textContent=mostRecent?fmtDate(mostRecent):'Noch keine Live-Daten';
+}
+function valid(n){return Number.isFinite(n)&&n>0;}
+async function get(url){
+ const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),9000);
+ try{const r=await fetch(url,{cache:'no-store',signal:controller.signal});if(!r.ok)throw new Error('HTTP '+r.status);const txt=await r.text();try{return JSON.parse(txt);}catch{return txt.trim();}}
+ finally{clearTimeout(timeout);}
+}
+async function oneOf(tasks){let errors=[];for(const task of tasks){try{return await task();}catch(e){errors.push(e.message)}}throw new Error(errors.join(' | '));}
+async function loadPrice(){
+ const data=await oneOf([
+  async()=>{const x=(await get('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur&include_market_cap=true')).bitcoin; const usd=Number(x?.usd),eur=Number(x?.eur),cap=Number(x?.usd_market_cap);if(!valid(usd))throw Error('CoinGecko: Kurs ungültig');return {usd,eur:valid(eur)?eur:null,cap:valid(cap)?cap:null};},
+  async()=>{const [usdData,eurData]=await Promise.all([get('https://api.coinbase.com/v2/prices/BTC-USD/spot'),get('https://api.coinbase.com/v2/prices/BTC-EUR/spot')]);const usd=Number(usdData.data?.amount),eur=Number(eurData.data?.amount);if(!valid(usd))throw Error('Coinbase: Kurs ungültig');return {usd,eur:valid(eur)?eur:null,cap:null};},
+  async()=>{const x=await get('https://mempool.space/api/v1/prices');const usd=Number(x.USD),eur=Number(x.EUR);if(!valid(usd))throw Error('mempool: Kurs ungültig');return {usd,eur:valid(eur)?eur:null,cap:null};}
+ ]);
+ // Wird die Market Cap von CoinGecko nicht geliefert, die Bitcoin-Umlaufmenge aus der Blockhöhe berechnen.
+ if(!data.cap){const height=state.block;if(Number.isInteger(height)&&height>0){let minted=0,remaining=height+1,reward=50;while(remaining>0&&reward>0){const blocks=Math.min(210000,remaining);minted+=blocks*reward;remaining-=blocks;reward/=2;}data.cap=minted*data.usd;data.capEstimated=true;}}
+ return data;
+}
+async function loadBlock(){return oneOf([async()=>{const n=Number(await get('https://mempool.space/api/blocks/tip/height'));if(!valid(n))throw Error('Blockhöhe ungültig');return n;},async()=>{const n=Number(await get('https://blockstream.info/api/blocks/tip/height'));if(!valid(n))throw Error('Blockhöhe ungültig');return n;}]);}
+async function loadFees(){const x=await get('https://mempool.space/api/v1/fees/recommended');const fast=Number(x.fastestFee),normal=Number(x.halfHourFee),slow=Number(x.hourFee);if(!valid(fast)||!valid(normal)||!valid(slow))throw Error('Gebühren ungültig');return {fast,normal,slow};}
+async function loadHash(){const x=await get('https://mempool.space/api/v1/mining/hashrate/3d');const h=Number(x.currentHashrate);if(!valid(h))throw Error('Hashrate ungültig');const diff=Number(x.currentDifficulty);if(valid(diff))state.hashDifficulty=diff;return h/1e18;}
+async function loadDifficulty(){
+ const d=await get('https://mempool.space/api/v1/difficulty-adjustment');
+ const next=Number(d.difficultyChange),prev=Number(d.previousRetarget),avgMs=Number(d.adjustedTimeAvg||d.timeAvg),
+ nextDate=Number(d.estimatedRetargetDate),previousTime=Number(d.previousTime),remaining=Number(d.remainingBlocks);
+ if(!Number.isFinite(next)||!Number.isFinite(prev))throw Error('Difficulty-Daten ungültig');
+ return {next,prev,avgMs:Number.isFinite(avgMs)&&avgMs>0?avgMs:null,nextDate:Number.isFinite(nextDate)&&nextDate>0?nextDate:null,
+ previousTime:Number.isFinite(previousTime)&&previousTime>0?previousTime:null,remaining:Number.isFinite(remaining)?remaining:null};
+}
+async function loadBlocks24(){
+ // API liefert die Höhe des Blocks, der dem Zeitstempel von vor 24 Stunden am nächsten liegt.
+ const cutoff=Math.floor(Date.now()/1000)-86400;
+ const data=await get('https://mempool.space/api/v1/mining/blocks/timestamp/'+cutoff);
+ const historicalHeight=Number(data.height);
+ if(!Number.isInteger(historicalHeight)||!Number.isInteger(state.block))throw Error('24h-Höhe fehlt');
+ const count=state.block-historicalHeight;
+ if(count<0||count>500)throw Error('24h-Blöcke ungültig');
+ return count;
+}
+async function refresh(){
+ if(refreshing)return;refreshing=true;$('refreshBtn').disabled=true;$('refreshBtn').textContent='↻ Aktualisiere …';$('statusBox').textContent='Live-Daten werden abgerufen …';
+ let success=0,fail=0;fetchErrors=[];
+ async function perform(key,load){try{const value=await load();state[key]=value;timestamps[key]=Date.now();success++;store();render();}catch(e){console.warn('Live-Daten:',key,e);fail++;fetchErrors.push(key+': '+(e?.message||'unbekannter Fehler'));}}
+ // Block zuerst, damit eine eventuell nötige Market-Cap-Ersatzrechnung die aktuelle Höhe verwendet.
+ await Promise.all([perform('block',loadBlock),perform('fees',loadFees),perform('hash',loadHash),perform('difficulty',loadDifficulty)]);
+ if(Number.isInteger(state.block))await perform('blocks24',loadBlocks24);
+ await perform('price',loadPrice);
+ if(state.price?.capEstimated)$('marketMeta').textContent='Schätzung: Kurs × errechnete Umlaufmenge';
+ else if(state.price?.cap)$('marketMeta').textContent='Marktwert in US-Dollar';
+ const recent=Math.max(0,...Object.values(timestamps));
+ if(!fail)$('statusBox').innerHTML='<span class="ok">Alle Live-Daten aktualisiert</span>';
+ else if(success)$('statusBox').innerHTML='<span class="warn">Teilweise aktualisiert – fehlende Quellen behalten den letzten Wert</span>';
+ else $('statusBox').innerHTML='<span class="error">Abruf fehlgeschlagen – '+(recent?'letzte gespeicherte Werte werden angezeigt':'noch keine Daten verfügbar')+'</span>';
+ if(fail){let hint='';if(location.protocol==='file:')hint=' · Mobil: Datei über HTTPS öffnen statt über die Dateivorschau'; $('statusBox').append(document.createTextNode(hint+' · Diagnose: '+fetchErrors.map(x=>x.split(':')[0]).join(', ')));}
+ refreshing=false;$('refreshBtn').disabled=false;$('refreshBtn').textContent='↻ Jetzt aktualisieren';
+}
+$('refreshBtn').addEventListener('click',refresh);
+render();refresh();setInterval(updateClock,1000);
+setInterval(()=>{if(document.visibilityState==='visible')refresh();},INTERVAL);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&Date.now()-Math.max(0,...Object.values(timestamps))>INTERVAL)refresh();});
+})();
+</script>
+</body></html>
